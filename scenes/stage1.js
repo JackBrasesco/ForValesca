@@ -56,13 +56,16 @@ class Stage1 extends Phaser.Scene {
     this.load.image('statusUIExhausted',"assets/statusUIExhausted.png");
     this.load.image('statusUITETW',"assets/statusUITETW.png");
     this.load.image('notEnoughFoodUI',"assets/notEnoughFoodUI.png")
-
+    this.load.image('carbon',"assets/carbon.jpg");
+    this.load.image('lumberUI',"assets/UILumber.png");
+    this.load.image('lumber','assets/lumber.png')
   }
 
   create() {
     //\/\//\///-BASIC SETUP AREA -//\\/\//\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/
     let townmembers = []
     let townmembersWIPList = []
+    let worksites = []
     let uiState = 'none'
     this.cursors = this.input.keyboard.createCursorKeys();
     this.map = this.make.tilemap({data: maps[0], tileWidth: 25, tileHeight: 25});
@@ -77,193 +80,8 @@ class Stage1 extends Phaser.Scene {
     this.worldView = this.camera.worldView;
     this.scrollX = 0;
     this.scrollY = 0;
-    //\/\///\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    // INSTANTIATION FOR GRAPHIC AND UI ELEMENTS ASSOCIATED WITH MINE      /\
     //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    this.mine = this.physics.add.sprite(1454,355,'mine');
-    this.mine.body.setAllowGravity(false);
-    this.mineButton = this.physics.add.sprite(1495,367,'addButton')
-    this.mineButton.body.setAllowGravity(false);
-    this.mineButton.setScale(1.5);
-    this.mineButton.setInteractive();
-    this.mineUI = this.physics.add.sprite(900,355,'mineUI')
-    this.mineUI.body.setAllowGravity(false);
-    this.mineUI.visible = false;
-    this.mineX = this.physics.add.sprite(1250,185,'xbutton');
-    console.log(this.mineX)
-    this.mineX.setInteractive();
-    this.mineX.body.setAllowGravity(false);
-    this.mineX.visible = false;
-    let mineX = this.mineX
-    let mineUI = this.mineUI
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    // BEHAVIOR FOR BUTTONS ASSOCIATED WITH MINE                           /\
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    //all '____Button's work the same
-    //first they check if the current uiState is clear and if it isn't it asks the gameManager to clear the UI
-    //then they check to see which townmembers are working at the specific worksite
-    //the townmembers who work here are then rendered in color and all other townmembers are rendered in grey
-    //these buttons are also responsible for changing the uiState
-    this.mineButton.on('pointerdown', function() {
-      function startUI() {
-        uiState = 'mine'
-        mineUI.visible = true;
-        mineX.visible = true;
-        mineOracle.visible = true;
-        gameManager.town.worksites.ui.moreWorkerButton.visible = true;
-        gameManager.town.worksites.ui.moreWorkerButtonMoveTo(816,514);
-        for (let i=0;i<townmembersWIPList.length;i++) {
-          townmembersWIPList[i].moveTo(584,340)
-          if (townmembersWIPList[i].working == 2 && townmembersWIPList[i].weakTag == false) {
-            townmembersWIPList[i].on();
-          } else if (townmembersWIPList[i].weakTag == false) {
-            townmembersWIPList[i].renderGrey();
-          } else {
-            console.log(townmembers)
-            townmembersWIPList[i].hide();
-          }
-        }
-      }
-      if (uiState == 'none') {
-        startUI()
-      } else {
-        gameManager.clearUI()
-        startUI()
-      }
-    })
-    //all '____X''s work the same
-    //first they hide associated UI elements
-    //then they set the uiState to 0
-    this.mineX.on('pointerdown', function() {
-      uiState = 'none'
-      mineUI.visible = false;
-      mineX.visible = false;
-      mineOracle.visible = false;
-      gameManager.town.worksites.ui.moreWorkerButton.visible = false;
-      gameManager.town.worksites.ui.moreWorkerBackButton.visible = false;
-      for (let i=0;i<townmembersWIPList.length;i++) {
-        townmembersWIPList[i].hide()
-      }
-    })
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    // INSTANTIATION FOR GRAPHIC AND UI ELEMENTS ASSOCIATED WITH HUNTER    /\
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    this.hunter = this.physics.add.sprite(200,75,'hunterhouse');
-    this.hunter.body.setAllowGravity(false);
-    this.hunterButton = this.physics.add.sprite(240,65,'addButton');
-    this.hunterButton.body.setAllowGravity(false);
-    this.hunterButton.setScale(1.5);
-    this.hunterButton.setInteractive();
-    this.hunterUI = this.physics.add.sprite(700,300,'hunterUI');
-    this.hunterUI.body.setAllowGravity(false);
-    this.hunterUI.visible = false;
-    this.hunterX = this.physics.add.sprite(1050,120,'xbutton');
-    this.hunterX.setInteractive()
-    this.hunterX.body.setAllowGravity(false);
-    this.hunterX.visible = false;
-    let hunterX = this.hunterX
-    let hunterUI = this.hunterUI
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    // BEHAVIOR FOR BUTTONS ASSOCIATED WITH HUNTER                         /\
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    this.hunterButton.on('pointerdown', function() {
-      function startUI() {
-        uiState = 'hunter'
-        hunterUI.visible = true;
-        hunterX.visible = true;
-        hunterOracle.visible = true;
-        gameManager.town.worksites.ui.moreWorkerButton.visible = true;
-        gameManager.town.worksites.ui.moreWorkerButtonMoveTo(615,453);
-        for (let i=0;i<townmembersWIPList.length;i++) {
-          townmembersWIPList[i].moveTo(384,275)
-          if (townmembersWIPList[i].working == 4 && townmembersWIPList[i].weakTag == false) {
-            townmembersWIPList[i].on();
-          } else if (townmembersWIPList[i].weakTag == false) {
-            townmembersWIPList[i].renderGrey();
-          } else {
-            townmembersWIPList[i].hide();
-          }
-        }
-      }
-      if (uiState == 'none') {
-        startUI()
-      } else {
-        gameManager.clearUI()
-        startUI()
-      }
-    })
-    this.hunterX.on('pointerdown',function() {
-      uiState = 'none'
-      hunterUI.visible = false;
-      hunterX.visible = false;
-      hunterOracle.visible = false;
-      gameManager.town.worksites.ui.moreWorkerButton.visible = false;
-      gameManager.town.worksites.ui.moreWorkerBackButton.visible = false;
-      for (let i=0;i<townmembersWIPList.length;i++) {
-        townmembersWIPList[i].hide()
-      }
-    })
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    // INSTANTIATION FOR GRAPHIC AND UI ELEMENTS ASSOCIATED WITH TRADER    /\
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    this.trader = this.physics.add.sprite(255,300,'trader');
-    this.trader.body.setAllowGravity(false);
-    this.trader.setScale(1.5);
-    this.traderButton = this.physics.add.sprite(310,290,'addButton');
-    this.traderButton.body.setAllowGravity(false);
-    this.traderButton.setScale(1.5);
-    this.traderButton.setInteractive();
-    this.traderUI = this.physics.add.sprite(800,300,'traderUI')
-    this.traderUI.body.setAllowGravity(false);
-    this.traderUI.visible = false;
-    this.traderX = this.physics.add.sprite(1150,130,'xbutton');
-    this.traderX.setInteractive();
-    this.traderX.body.setAllowGravity(false);
-    this.traderX.visible = false;
-    let traderX = this.traderX
-    let traderUI = this.traderUI
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    // BEHAVIOR FOR BUTTONS ASSOCIATED WITH TRADER                         /\
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    this.traderButton.on('pointerdown', function() {
-      function startUI() {
-          uiState = 'trader'
-          traderUI.visible = true;
-          traderX.visible = true;
-          traderOracle.visible = true;
-          gameManager.town.worksites.ui.moreWorkerButton.visible = true;
-          gameManager.town.worksites.ui.moreWorkerButtonMoveTo(715,450)
-          for (let i=0;i<townmembersWIPList.length;i++) {
-            townmembersWIPList[i].moveTo(484,275)
-            if (townmembersWIPList[i].working == 3 && townmembersWIPList[i].weakTag == false) {
-              townmembersWIPList[i].on();
-            } else if (townmembersWIPList[i].weakTag == false) {
-              townmembersWIPList[i].renderGrey();
-            } else {
-              townmembersWIPList[i].hide();
-            }
-          }
-      }
-      if (uiState == 'none') {
-        startUI()
-      } else {
-        gameManager.clearUI()
-        startUI()
-      }
-    });
-    this.traderX.on('pointerdown', function() {
-      uiState = 'none'
-      traderUI.visible = false;
-      traderX.visible = false;
-      traderOracle.visible = false;
-      gameManager.town.worksites.ui.moreWorkerButton.visible = false;
-      gameManager.town.worksites.ui.moreWorkerBackButton.visible = false;
-      for (let i=0;i<townmembersWIPList.length;i++) {
-        townmembersWIPList[i].hide()
-      }
-    })
-    //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    // INSTANTIATION FOR GRAPHIC AND UI ELEMENTS ASSOCIATED WITH FARM      /\
+    // INSTANTIATION FOR GRAPHIC ELEMENTS ASSOCIATED WITH FARM             /\
     //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
     this.farm1 = this.physics.add.sprite(1050,675,'farm');
     this.farm2 = this.physics.add.sprite(1050,825,'farm');
@@ -271,35 +89,59 @@ class Stage1 extends Phaser.Scene {
     this.farm2.body.setAllowGravity(false);
     this.farm1.setScale(0.75);
     this.farm2.setScale(0.75);
-    this.farmhouse = this.physics.add.sprite(1255,685,'farmhouse');
-    this.farmhouse.body.setAllowGravity(false);
-    this.farmButton = this.physics.add.sprite(1290,675,'addButton');
-    this.farmButton.body.setAllowGravity(false);
-    this.farmButton.setScale(1.5);
-    this.farmButton.setInteractive();
-    this.farmUI = this.physics.add.sprite(750,675,'farmUI')
-    this.farmUI.body.setAllowGravity(false);
-    this.farmUI.visible = false;
-    this.farmX = this.physics.add.sprite(1100,500,'xbutton');
-    this.farmX.setInteractive()
-    this.farmX.body.setAllowGravity(false);
-    this.farmX.visible = false;
-    let farmX = this.farmX
-    let farmUI = this.farmUI
     //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    // BEHAVIOR FOR BUTTONS ASSOCIATED WITH FARM                           /\
+    // CREATION AND INITIALIZATION OF WORKSITE CLASS                       /\
     //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
-    this.farmButton.on('pointerdown', function() {
-      function startUI() {
-        uiState = 'farm'
-        farmUI.visible = true;
-        farmX.visible = true;
-        farmOracle.visible = true;
-        gameManager.town.worksites.ui.moreWorkerButton.visible = true;
-        gameManager.town.worksites.ui.moreWorkerButtonMoveTo(665,825)
+    class Worksite {
+      constructor(name,id,workSprite,worksiteButton,worksiteUI,worksiteX,worksiteOracle,townmemberOffset,tireAmount,output,built) {
+        this.name = name;
+        this.id = id;
+        this.workSprite = workSprite;
+        this.worksiteButton = worksiteButton;
+        this.worksiteUI = worksiteUI;
+        this.worksiteX = worksiteX;
+        this.worksiteOracle = worksiteOracle;
+        this.townmemberOffset = townmemberOffset;
+        this.tireAmount = tireAmount;
+        this.output = output
+        this.multiplier = 0
+        this.built = built;
+      }
+      init() {
+        this.worksiteUI.body.setAllowGravity(false);
+        this.worksiteUI.visible = false;
+        this.worksiteX.setInteractive();
+        this.worksiteX.body.setAllowGravity(false);
+        this.worksiteX.visible = false;
+        this.worksiteOracle.visible = false;
+        this.worksiteButton.setInteractive();
+        this.worksiteButton.setScale(1.5);
+        this.worksiteButton.body.setAllowGravity(false);
+        this.workSprite.body.setAllowGravity(false);
+        worksites.push(this);
+        console.log(this.output)
+      }
+      resolveX() {
+        uiState = 'none'
+        this.worksiteUI.visible = false;
+        this.worksiteX.visible = false;
+        this.worksiteOracle.visible = false;
+        gameManager.town.worksites.ui.moreWorkerButton.visible = false;
+        gameManager.town.worksites.ui.moreWorkerBackButton.visible = false;
         for (let i=0;i<townmembersWIPList.length;i++) {
-          townmembersWIPList[i].moveTo(434,650)
-          if (townmembersWIPList[i].working == 1 && townmembersWIPList[i].weakTag == false) {
+          townmembersWIPList[i].hide()
+        }
+      }
+      startUI() {
+        uiState = this.name
+        this.worksiteUI.visible = true;
+        this.worksiteX.visible = true;
+        this.worksiteOracle.visible = true;
+        gameManager.town.worksites.ui.moreWorkerButton.visible = true;
+        gameManager.town.worksites.ui.moreWorkerButtonMoveTo(this.townmemberOffset[0]+231,this.townmemberOffset[1]+175)
+        for (let i=0;i<townmembersWIPList.length;i++) {
+          townmembersWIPList[i].moveTo(this.townmemberOffset[0],this.townmemberOffset[1])
+          if (townmembersWIPList[i].working == this.id && townmembersWIPList[i].weakTag == false) {
             townmembersWIPList[i].on();
           } else if (townmembersWIPList[i].weakTag == false) {
             townmembersWIPList[i].renderGrey();
@@ -308,25 +150,39 @@ class Stage1 extends Phaser.Scene {
           }
         }
       }
-      if (uiState == 'none') {
-       startUI()
-      } else {
-        gameManager.clearUI()
-        startUI()
+      resolveButton() {
+        if (uiState == 'none') {
+         this.startUI()
+        } else {
+          gameManager.clearUI()
+          this.startUI()
+        }
       }
-    })
-    this.farmX.on('pointerdown', function() {
-      uiState = 'none'
-      farmUI.visible = false;
-      farmX.visible = false;
-      farmOracle.visible = false;
-      gameManager.town.worksites.ui.moreWorkerButton.visible = false;
-      gameManager.town.worksites.ui.moreWorkerBackButton.visible = false;
+    }
 
-      for (let i=0;i<townmembersWIPList.length;i++) {
-        townmembersWIPList[i].hide()
-      }
-    })
+    let farm = new Worksite("farm",1,this.physics.add.sprite(1255,685,'farmhouse'),this.physics.add.sprite(1290,675,'addButton'),this.physics.add.sprite(750,675,'farmUI'), this.physics.add.sprite(1100,500,'xbutton'),this.add.text(790,585,"0",{ fontFamily: '"Roboto Condensed"'}),[434,650],1/2,[5,"food"],true);
+    let mine = new Worksite("mine",2,this.physics.add.sprite(1454,355,'mine'),this.physics.add.sprite(1495,367,'addButton'),this.physics.add.sprite(900,355,'mineUI'),this.physics.add.sprite(1250,185,'xbutton'),this.add.text(930,265,"0" ,{ fontFamily: '"Roboto Condensed"'}),[584,340],1,[],true);
+    let trader = new Worksite("trader",3,this.physics.add.sprite(255,300,'trader'),this.physics.add.sprite(310,290,'addButton'),this.physics.add.sprite(800,300,'traderUI'),this.physics.add.sprite(1150,130,'xbutton'),this.add.text(835,215,"0" ,{ fontFamily: '"Roboto Condensed"'}),[484,275],1/3,[25,"money"],true);
+    let hunter = new Worksite("hunter",4,this.physics.add.sprite(200,75,'hunterhouse'),this.physics.add.sprite(240,65,'addButton'),this.physics.add.sprite(700,300,'hunterUI'),this.physics.add.sprite(1050,120,'xbutton'),this.add.text(735,215,"0" ,{ fontFamily: '"Roboto Condensed"'}),[384,275],1/2,[3,"food"],true);
+    let lumber = new Worksite("lumber",5,this.physics.add.sprite(400,85,'lumber'),this.physics.add.sprite(440,75,'addButton'),this.physics.add.sprite(800,300,'lumberUI'),this.physics.add.sprite(1150,120,'xbutton'),this.add.text(835,215,"0" ,{ fontFamily: '"Roboto Condensed"'}),[484,275],1/2,[20,"wood"],true);
+
+    farm.init()
+    mine.init()
+    trader.init()
+    hunter.init()
+    lumber.init()
+    trader.workSprite.setScale(1.5)
+
+    farm.worksiteButton.on('pointerdown',function() {farm.resolveButton()});
+    farm.worksiteX.on('pointerdown',function() {farm.resolveX()});
+    mine.worksiteButton.on('pointerdown',function() {mine.resolveButton()});
+    mine.worksiteX.on('pointerdown',function() {mine.resolveX()});
+    trader.worksiteButton.on('pointerdown',function() {trader.resolveButton()});
+    trader.worksiteX.on('pointerdown',function() {trader.resolveX()});
+    hunter.worksiteButton.on('pointerdown',function() {hunter.resolveButton()});
+    hunter.worksiteX.on('pointerdown',function() {hunter.resolveX()});
+    lumber.worksiteButton.on('pointerdown',function() {lumber.resolveButton()});
+    lumber.worksiteX.on('pointerdown',function() {lumber.resolveX()});
     //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
     // CREATION AND INITIALIZATION OF TOWNMEMBER CLASS                     /\
     //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
@@ -383,6 +239,8 @@ class Stage1 extends Phaser.Scene {
           this.working = 3
         } else if (uiState == 'hunter') {
           this.working = 4
+        } else if (uiState == 'lumber') {
+          this.working = 5
         }
         gameManager.calculateMultipliers()
         gameManager.setResourceUI();
@@ -512,16 +370,16 @@ class Stage1 extends Phaser.Scene {
         this.tire = this.tire + exhaustion
       }
     }
-    let reilaCatell = new Townmember("Reila Catell", 34, "I am happy",[],["carpenter","labor"],[0,0],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"reilaPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
+    let reilaCatell = new Townmember("Reila Catell", 34, "I am happy",[],["carpenter","lumber","mine"],[0,0],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"reilaPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
     let daltisNaalor = new Townmember("Daltis Naalor", 43, "I am happy",[],["hunter","hunter","hunter"],[63,0],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"daltisPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
-    let larrisParge = new Townmember("Larris Parge", 37, "I am happy",[],["farmer","labor"],[126,0],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"larrisPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
-    let lucindaParge = new Townmember("Lucinda Parge", 32, "I am happy",[],["farmer"],[189,0],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"lucindaPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
+    let larrisParge = new Townmember("Larris Parge", 37, "I am happy",[],["farm","lumber","mine"],[126,0],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"larrisPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
+    let lucindaParge = new Townmember("Lucinda Parge", 32, "I am happy",[],["farm"],[189,0],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"lucindaPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
     let cebanVepren = new Townmember("Ceban Vepren", 26, "I am happy",[],["trader"],[0,74],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"cebanPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
     let kainaVepren = new Townmember("Kaina Vepren", 22, "I am happy",[],[],[63,74],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"kainaPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
-    let jarackRhysling = new Townmember("Jarack Rhysling", 74, "I am happy",[],["prayer","monk","labor"],[126,74],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"jarackPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
+    let jarackRhysling = new Townmember("Jarack Rhysling", 74, "I am happy",[],["prayer","monk","lumber","mine"],[126,74],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"jarackPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
     let verdaanisPadra = new Townmember("Verdaanis Padra", 52, "I am happy",[],["prayer","monk"],[189,74],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"verdaanisPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
     let alvorRiverwood = new Townmember("Alvor Riverwood", 39, "I am happy",[],["smith","smith","smith"],[0,148],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"alvorPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
-    let marstonSinch = new Townmember("Marston Sinch", 45, "I am happy",[],["labor"],[63,148],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"marstonPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
+    let marstonSinch = new Townmember("Marston Sinch", 45, "I am happy",[],["lumber","mine"],[63,148],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"marstonPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
     let corlissSinch = new Townmember("Corliss Sinch", 43, "I am happy",[],[],[126,148],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"corlissPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
     let maecyCorbray = new Townmember("Maecy Corbray", 33, "I am happy",[],[],[189,148],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"maecyPopup"),false,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
     let lucasParge = new Townmember("Lucas Parge", 8, "I am happy",[],[],[252,74],this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey"),this.physics.add.sprite(0,0,"lucasPopup"),true,[this.physics.add.sprite(50,50,"placeholder"),this.physics.add.sprite(0,0,"placeholderGrey")])
@@ -708,14 +566,6 @@ class Stage1 extends Phaser.Scene {
     let stoneNumber = this.add.text(30,95,"0",{ fontFamily: '"Roboto Condensed"' }).setScrollFactor(0);
     let metalNumber = this.add.text(30,125,"0",{ fontFamily: '"Roboto Condensed"' }).setScrollFactor(0);
     let moneyNumber = this.add.text(30,165,"0",{ fontFamily: '"Roboto Condensed"' }).setScrollFactor(0);
-    let farmOracle = this.add.text(790,585,"0",{ fontFamily: '"Roboto Condensed"'})
-    let mineOracle = this.add.text(930,265,"0" ,{ fontFamily: '"Roboto Condensed"'})
-    let traderOracle = this.add.text(835,215,"0" ,{ fontFamily: '"Roboto Condensed"'})
-    let hunterOracle = this.add.text(735,215,"0" ,{ fontFamily: '"Roboto Condensed"'})
-    farmOracle.visible = false;
-    mineOracle.visible = false;
-    traderOracle.visible = false;
-    hunterOracle.visible = false;
     let mwb = this.physics.add.sprite(0,0,"moreWorker");
     mwb.setInteractive()
     mwb.body.setAllowGravity(false);
@@ -733,17 +583,8 @@ class Stage1 extends Phaser.Scene {
     //\/\//\/\//\///\\/\/\/\/\/\\\/\/\/\/\/\/\/\\\/\\/\\/\/\//\/\//\\/\//\\/\
     this.ventureButton.on('pointerdown', function() {
       gameManager.calculateMultipliers()
-      console.log("farm multiplier: " + gameManager.town.worksites.farm.multiplier)
-      console.log("mine multiplier: " + gameManager.town.worksites.mine.multiplier)
-      console.log("trader multiplier: " + gameManager.town.worksites.trader.multiplier)
-      console.log("hunter multiplier: " + gameManager.town.worksites.hunter.multiplier)
       gameManager.calculateGainedResources()
-      console.log("food: " + gameManager.town.resources.food)
-      console.log("stone: " + gameManager.town.resources.stone)
-      console.log("metal: " + gameManager.town.resources.metal)
-      console.log("money: " + gameManager.town.resources.money)
       gameManager.feedTown();
-      console.log("food: " + gameManager.town.resources.food)
       gameManager.setResourceUI();
       gameManager.resetTire();
       gameManager.calculateTire();
@@ -776,10 +617,11 @@ class Stage1 extends Phaser.Scene {
               metal: metalNumber,
             },
             oracle: {
-              farm: farmOracle,
-              mine: mineOracle,
-              trader: traderOracle,
-              hunter: hunterOracle,
+              farm: farm.worksiteOracle,
+              mine: mine.worksiteOracle,
+              trader: trader.worksiteOracle,
+              hunter: hunter.worksiteOracle,
+              lumber: lumber.worksiteOracle,
             },
             foodScreen: notEnoughFoodUI,
           }
@@ -798,22 +640,13 @@ class Stage1 extends Phaser.Scene {
               gameManager.town.worksites.ui.moreWorkerBackButton.visible = true;
               gameManager.town.worksites.ui.moreWorkerButton.visible = false;
               for (let i=0;i<gameManager.townmembersWIP.length;i++) {
-                let uiStateNumber = "none"
-                if (uiState == "none") {
-                  uiStateNumber = 0
-                } else if (uiState == "farm") {
-                  uiStateNumber = 1
-                } else if (uiState == "mine") {
-                  uiStateNumber = 2
-                } else if (uiState == "trader") {
-                  uiStateNumber = 3
-                } else if (uiState == "hunter") {
-                  uiStateNumber = 4
-                }
-                if (gameManager.townmembersWIP[i].weakTag == true && gameManager.townmembersWIP[i].working == uiStateNumber) {
-                  gameManager.townmembersWIP[i].on();
-                } else if (gameManager.townmembersWIP[i].weakTag == true) {
-                  gameManager.townmembersWIP[i].renderGrey();
+                for (let k=0;k<gameManager.worksites.length;k++) {
+                  if (gameManager.townmembersWIP[i].weakTag == true && gameManager.townmembersWIP[i].working == gameManager.worksites[k].id && gameManager.worksites[k].name == uiState) {
+                    gameManager.townmembersWIP[i].on()
+                    break;
+                  } else if (gameManager.townmembersWIP[i].weakTag == true) {
+                    gameManager.townmembersWIP[i].renderGrey();
+                  }
                 }
               }
             },
@@ -826,78 +659,37 @@ class Stage1 extends Phaser.Scene {
                 }
               }
             }
+          }
           },
-          farm: {
-            output: {
-              food: 5,
-            },
-            multiplier: 0,
-            oracleText: function() {
-              return gameManager.town.worksites.farm.output.food * gameManager.town.worksites.farm.multiplier
-              },
-            },
           mine: {
-            output: {
-              stone: 0,
-              metal: 0,
-              oracleText: 0
-            },
             outputGenerator: function() {
               let mineRNG = (Math.floor(Math.random() * 100))/100
-              console.log(mineRNG)
               if (0 < mineRNG && mineRNG < 0.011) {
                 //event manager ==> 'found an emerald in the mine'
                 console.log("emerald found!")
-                this.output.stone = 35;
-                this.output.metal = 5;
+                mine.output = [35,"stone",5,"metal"]
               } else if (0.01 < mineRNG && mineRNG < 0.06) {
-                this.output.stone = 35;
-                this.output.metal = 10;
+                mine.output = [35,"stone",10,"metal"]
               } else if (0.05 < mineRNG && mineRNG < 0.11) {
-                this.output.stone = 40;
-                this.output.metal = 5;
+                mine.output = [40,"stone",5,"metal"]
               } else if (0.10 < mineRNG && mineRNG < 0.41) {
-                this.output.stone = 30;
-                this.output.metal = 5;
+                mine.output = [30,"stone",5,"metal"]
               } else {
-                this.output.stone = 35;
-                this.output.metal = 5;
+                mine.output = [35,"stone",5,"metal"]
               }
-            },
-            multiplier: 0
-          },
-          trader: {
-            output: {
-              money: 25,
-            },
-            multiplier: 0,
-            oracleText: 0
-          },
-          hunter: {
-            output: {
-              food: 3,
-            },
-            multiplier: 0,
-            oracleText: 0
-          }
+            }
         }
       },
       townmembers: townmembers,
       townmembersWIP: townmembersWIPList,
+      worksites: worksites,
       clearUI: function() {
         uiState = 'none'
-        farmUI.visible = false;
-        farmX.visible = false;
-        farmOracle.visible = false;
-        mineUI.visible = false;
-        mineX.visible = false;
-        mineOracle.visible = false;
-        traderUI.visible = false;
-        traderX.visible = false;
-        traderOracle.visible = false;
-        hunterUI.visible = false;
-        hunterX.visible = false;
-        hunterOracle.visible = false;
+        for (let i=0;i<this.worksites.length;i++) {
+          this.worksites[i].worksiteUI.visible = false;
+          this.worksites[i].worksiteX.visible = false;
+          this.worksites[i].worksiteOracle.visible = false;
+        }
         gameManager.town.worksites.ui.moreWorkerButton.visible = false;
         gameManager.town.worksites.ui.moreWorkerBackButton.visible = false;
         reilaCatell.hide();
@@ -916,81 +708,50 @@ class Stage1 extends Phaser.Scene {
       calculateTire: function() {
         for (let i=0;i<this.townmembersWIP.length;i++) {
           if (this.townmembersWIP[i].weakTag == true) {
-            if (this.townmembersWIP[i].working == 1) {
-              this.townmembersWIP[i].increaseTire(1/2)
-            } else if (this.townmembersWIP[i].working == 2) {
-              this.townmembersWIP[i].increaseTire(1)
-            } else if (this.townmembersWIP[i].working == 3) {
-              this.townmembersWIP[i].increaseTire(1/3)
-            } else if (this.townmembersWIP[i].working == 4) {
-              this.townmembersWIP[i].increaseTire(1/3)
-            } else {
-              this.townmembersWIP[i].increaseTire(-1/3)
-              if (this.townmembersWIP[i].tire < 0) {
-                this.townmembersWIP[i].tire = 0
+            for (let k=0;k<this.worksites.length;k++) {
+              if (this.worksites[k].id == this.townmembersWIP[i].working) {
+                this.townmembersWIP[i].increaseTire(this.worksites[k].tireAmount);
               }
             }
           }
         }
       },
       calculateMultipliers: function() {
-        let farm = 0
-        let mine = 0
-        let trader = 0
-        let hunter = 0
+        for (let i=0;i<this.worksites.length;i++) {
+          this.worksites[i].multiplier = 0
+        }
         for (let i=0;i<this.townmembersWIP.length;i++) {
-          if (this.townmembersWIP[i].working == 1) {
-            let bonus = 0
-            for (let k = 0;k<this.townmembersWIP[i].bonuses.length;k++) {
-              if (this.townmembersWIP[i].bonuses[k] == "farmer") {
-                bonus = bonus + 1
+          for (let k=0;k<this.worksites.length;k++) {
+            if (this.townmembersWIP[i].working == this.worksites[k].id) {
+              let bonus = 0
+              for (let m=0;m<this.townmembersWIP[i].bonuses.length;m++) {
+                  if (this.townmembersWIP[i].bonuses[m] == this.worksites[k].name) {
+                    bonus++
+                  }
               }
+              this.worksites[k].multiplier = this.worksites[k].multiplier + 1 + bonus
             }
-            farm = farm + 1 + bonus
-          } else if (this.townmembersWIP[i].working == 2) {
-              let bonus = 0
-              for (let k = 0;k<this.townmembersWIP[i].bonuses.length;k++) {
-                if (this.townmembersWIP[i].bonuses[k] == "labor") {
-                  bonus = bonus + 1
-                }
-              }
-              mine = mine + 1 + bonus
-          } else if (this.townmembersWIP[i].working == 3) {
-              let bonus = 0
-              for (let k = 0;k<this.townmembersWIP[i].bonuses.length;k++) {
-                if (this.townmembersWIP[i].bonuses[k] == "trader") {
-                  bonus = bonus + 1
-                }
-              }
-              trader = trader + 1 + bonus
-          } else if (this.townmembersWIP[i].working == 4) {
-              let bonus = 0
-              for (let k = 0;k<this.townmembersWIP[i].bonuses.length;k++) {
-                if (this.townmembersWIP[i].bonuses[k] == "hunter") {
-                  bonus = bonus + 1
-                }
-              }
-              hunter = hunter + 1 + bonus
           }
         }
-        this.town.worksites.farm.multiplier = farm;
-        this.town.worksites.mine.multiplier = mine;
-        this.town.worksites.trader.multiplier = trader;
-        this.town.worksites.hunter.multiplier = hunter;
       },
       calculateGainedResources: function() {
-        console.log(this.town.worksites.farm.multiplier)
-        this.town.worksites.mine.outputGenerator();
-        let newFoodFarm = (this.town.worksites.farm.output.food * this.town.worksites.farm.multiplier)
-        let newFoodHunter = (this.town.worksites.hunter.output.food * this.town.worksites.hunter.multiplier)
-        let newStone = (this.town.worksites.mine.output.stone * this.town.worksites.mine.multiplier);
-        let newMetal = (this.town.worksites.mine.output.metal * this.town.worksites.mine.multiplier);
-        let newMoney = (this.town.worksites.trader.output.money * this.town.worksites.trader.multiplier);
-        this.town.resources.food = this.town.resources.food + newFoodFarm
-        this.town.resources.food = this.town.resources.food + newFoodHunter
-        this.town.resources.stone = this.town.resources.stone + newStone
-        this.town.resources.metal = this.town.resources.metal + newMetal
-        this.town.resources.money = this.town.resources.money + newMoney
+        this.town.mine.outputGenerator();
+        for (let i=0;i<this.worksites.length;i++) {
+          for (let k=0;k<this.worksites[i].output.length;k+=2) {
+            let newResource = (this.worksites[i].output[k] * this.worksites[i].multiplier)
+            if (this.worksites[i].output[k+1] == "food") {
+              this.town.resources.food = this.town.resources.food + newResource
+            } else if (this.worksites[i].output[k+1] == "stone") {
+              this.town.resources.stone = this.town.resources.stone + newResource
+            } else if (this.worksites[i].output[k+1] == "metal") {
+              this.town.resources.metal = this.town.resources.metal + newResource
+            } else if (this.worksites[i].output[k+1] == "money") {
+              this.town.resources.money = this.town.resources.money + newResource
+            } else if (this.worksites[i].output[k+1] == "wood") {
+              this.town.resources.wood = this.town.resources.wood + newResource
+            }
+          }
+        }
       },
       feedTown: function() {
         if (this.town.resources.food > 19) {
@@ -1019,10 +780,11 @@ class Stage1 extends Phaser.Scene {
         this.setOracleText()
       },
       setOracleText: function() {
-        this.town.resources.ui.oracle.farm.setText((gameManager.town.worksites.farm.output.food * gameManager.town.worksites.farm.multiplier) + " Food");
-        this.town.resources.ui.oracle.mine.setText((30 * gameManager.town.worksites.mine.multiplier)+"-"+ (40 * gameManager.town.worksites.mine.multiplier) + " Stone + " + (5 * gameManager.town.worksites.mine.multiplier)+"-"+(10 * gameManager.town.worksites.mine.multiplier) + " Metal")
-        this.town.resources.ui.oracle.trader.setText((gameManager.town.worksites.trader.output.money * gameManager.town.worksites.trader.multiplier) + " Money")
-        this.town.resources.ui.oracle.hunter.setText((gameManager.town.worksites.hunter.output.food * gameManager.town.worksites.hunter.multiplier) + " Food")
+        this.town.resources.ui.oracle.farm.setText((gameManager.worksites[0].output[0] * gameManager.worksites[0].multiplier) + " Food");
+        this.town.resources.ui.oracle.mine.setText((30 * gameManager.worksites[1].multiplier)+"-"+ (40 * gameManager.worksites[1].multiplier) + " Stone + " + (5 * gameManager.worksites[1].multiplier)+"-"+(10 * gameManager.worksites[1].multiplier) + " Metal")
+        this.town.resources.ui.oracle.trader.setText((gameManager.worksites[2].output[0] * gameManager.worksites[2].multiplier) + " Money")
+        this.town.resources.ui.oracle.hunter.setText((gameManager.worksites[3].output[0] * gameManager.worksites[3].multiplier) + " Food")
+        this.town.resources.ui.oracle.lumber.setText((gameManager.worksites[4].output[0] * gameManager.worksites[4].multiplier) + " Wood")
       }
     }
   }
@@ -1045,5 +807,5 @@ class Stage1 extends Phaser.Scene {
       this.camera.scrollY = this.scrollY
     }
   }
-
 };
+
